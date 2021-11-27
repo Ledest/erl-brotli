@@ -32,6 +32,8 @@
 
 -on_load(init/0).
 
+-compile([no_inline, nowarn_nif_inline]).
+
 -define(APPNAME, brotli).
 -define(LIBNAME, brotli).
 
