@@ -15,22 +15,26 @@ OUT ?= $(BASEDIR)/priv
 UNAME_SYS := $(shell uname -s)
 ifeq ($(UNAME_SYS), Darwin)
 	CC ?= cc
-	CFLAGS += -O3 -std=c99 -arch x86_64 -finline-functions -Wall
+	CFLAGS += -O2 -std=c99 -arch x86_64 -finline-functions -Wall
 	LDFLAGS ?= -arch x86_64 -flat_namespace -undefined suppress
 else ifeq ($(UNAME_SYS), FreeBSD)
 	CC = /usr/bin/clang
-	CFLAGS += -O3 -std=c99 -finline-functions -Wall
+	CFLAGS += -O2 -std=c99 -finline-functions -Wall
 else ifeq ($(UNAME_SYS), Linux)
 	CC ?= gcc
-	CFLAGS += -O3 -std=c99 -finline-functions -Wall
+	CFLAGS += -O2 -std=c99 -finline-functions -Wall
 endif
 
-CFLAGS += -fPIC -I $(ERTS_INCLUDE_DIR) -I ./include/
+CFLAGS += -fPIC -I $(ERTS_INCLUDE_DIR) \
+	$(shell pkg-config --cflags libbrotlidec) \
+	$(shell pkg-config --cflags libbrotlienc) \
+	$(shell pkg-config --cflags libbrotlicommon)
 
 LDFLAGS += -shared -rdynamic
 
-BROTLI_SRCS = $(wildcard common/*.c) $(wildcard dec/*.c) $(wildcard enc/*.c)
-BROTLI_OBJS = $(patsubst %.c,%.o,$(BROTLI_SRCS))
+LDLIBS += $(shell pkg-config --libs libbrotlidec) \
+	$(shell pkg-config --libs libbrotlienc) \
+	$(shell pkg-config --libs libbrotlicommon)
 
 # Verbosity.
 
@@ -45,24 +49,14 @@ link_verbose = $(link_verbose_$(V))
 
 lib: $(OUT)/$(PROJECT).so
 
-$(OUT)/$(PROJECT).so: brotli_nif.o $(BROTLI_OBJS)
+$(OUT)/$(PROJECT).so: brotli_nif.o
 	@mkdir -p $(@D)
-	$(link_verbose) $(CC) $^ $(LDFLAGS) $(LDLIBS) -o $@
-
-tool: $(OUT)/brotli
-
-$(OUT)/brotli: $(BROTLI_OBJS) tools/brotli.o
-	$(link_verbose) $(CC) $^ -lm $(LDLIBS) -o $@
-
-tools/brotli.o: tools/brotli.c
-	$(c_verbose) $(CC) -O2 -I ./include/ $(CPPFLAGS) -c $< -o $@
+	$(link_verbose) $(CC) $^ $(LDFLAGS) -o $@ $(LDLIBS)
 
 %.o: %.c
 	$(c_verbose) $(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 clean:
-	@rm -f $(OUT)/$(PROJECT).so \
-		$(OUT)/brotli $(BROTLI_OBJS) \
-		tools/brotli.o brotli_nif.o
+	@rm -f $(OUT)/$(PROJECT).so brotli_nif.o
 
-.PHONY: lib tool
+.PHONY: lib
