@@ -28,12 +28,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "common/version.h"
-#include "include/brotli/decode.h"
-#include "include/brotli/encode.h"
 #include <erl_nif.h>
 #include <stdio.h>
 #include <string.h>
+#include <brotli/decode.h>
+#include <brotli/encode.h>
 
 /* ATOMS {{{ */
 #define PARAMS                                                                 \
@@ -414,11 +413,12 @@ brotli_decoder_error_description(ErlNifEnv *env, int argc,
 static ERL_NIF_TERM brotli_version(ErlNifEnv *env, int argc,
                                    const ERL_NIF_TERM argv[]) {
   assert_argc(0);
+  uint32_t version = BrotliDecoderVersion();
 
   // Cache library version
-  ERL_NIF_TERM major = enif_make_int(env, BROTLI_VERSION >> 24);
-  ERL_NIF_TERM minor = enif_make_int(env, (BROTLI_VERSION >> 12) & 0xFFF);
-  ERL_NIF_TERM patch = enif_make_int(env, BROTLI_VERSION & 0xFFF);
+  ERL_NIF_TERM major = enif_make_int(env, version >> 24);
+  ERL_NIF_TERM minor = enif_make_int(env, (version >> 12) & 0xFFF);
+  ERL_NIF_TERM patch = enif_make_int(env, version & 0xFFF);
 
   return enif_make_tuple3(env, major, minor, patch);
 }
