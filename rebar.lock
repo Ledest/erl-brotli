@@ -1,1 +1,6 @@
-[].
+[{<<"libbrotli">>,
+  {raw,"https://github.com/google/brotli.git",
+       {mod_ref,git,
+                {ref,"e61745a6b7add50d380cfd7d3883dd6c62fc2c71"},
+                [{description,"Brotli is a generic-purpose lossless compression algorithm"}]}},
+  0}].

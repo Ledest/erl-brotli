@@ -25,16 +25,25 @@ else ifeq ($(UNAME_SYS), Linux)
 	CFLAGS += -O2 -std=c99 -finline-functions -Wall
 endif
 
-CFLAGS += -fPIC -I $(ERTS_INCLUDE_DIR) \
-	$(shell pkg-config --cflags libbrotlidec) \
-	$(shell pkg-config --cflags libbrotlienc) \
-	$(shell pkg-config --cflags libbrotlicommon)
+ifneq ($(LIBBROTLI_DIR),)
+BROTLI_CFLAGS = -I $(LIBBROTLI_DIR)/c/include
+BROTLI_STATIC_LIBS = $(LIBBROTLI_DIR)/libbrotlidec-static.a $(LIBBROTLI_DIR)/libbrotlienc-static.a $(LIBBROTLI_DIR)/libbrotlicommon-static.a
+BROTLI_LIBS = $(BROTLI_STATIC_LIBS)
+else
+BROTLI_CFLAGS = $(shell pkg-config --cflags libbrotlidec) \
+       $(shell pkg-config --cflags libbrotlienc) \
+       $(shell pkg-config --cflags libbrotlicommon)
+BROTLI_STATIC_LIBS =
+BROTLI_LIBS = $(shell pkg-config --libs libbrotlidec) \
+       $(shell pkg-config --libs libbrotlienc) \
+       $(shell pkg-config --libs libbrotlicommon)
+endif
+
+CFLAGS += -fPIC -I $(ERTS_INCLUDE_DIR) $(BROTLI_CFLAGS)
 
 LDFLAGS += -shared -rdynamic
 
-LDLIBS += $(shell pkg-config --libs libbrotlidec) \
-	$(shell pkg-config --libs libbrotlienc) \
-	$(shell pkg-config --libs libbrotlicommon)
+LDLIBS += $(BROTLI_LIBS)
 
 # Verbosity.
 
@@ -49,14 +58,19 @@ link_verbose = $(link_verbose_$(V))
 
 lib: $(OUT)/$(PROJECT).so
 
-$(OUT)/$(PROJECT).so: brotli_nif.o
+$(OUT)/$(PROJECT).so: brotli_nif.o $(BROTLI_STATIC_LIBS)
 	@mkdir -p $(@D)
-	$(link_verbose) $(CC) $^ $(LDFLAGS) -o $@ $(LDLIBS)
+	$(link_verbose) $(CC) $< $(LDFLAGS) -o $@ $(LDLIBS)
 
 %.o: %.c
 	$(c_verbose) $(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
+$(BROTLI_STATIC_LIBS):
+	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS_RELEASE="-O2 -DNDEBUG" -S $(LIBBROTLI_DIR) -B $(LIBBROTLI_DIR)
+	cmake --build $(LIBBROTLI_DIR) -j --config Release --verbose --target brotlicommon-static/fast brotlienc-static/fast brotlidec-static/fast
+
 clean:
 	@rm -f $(OUT)/$(PROJECT).so brotli_nif.o
+	@$(MAKE) -C $(LIBBROTLI_DIR) clean
 
 .PHONY: lib
