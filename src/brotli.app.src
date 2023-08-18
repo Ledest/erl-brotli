@@ -1,6 +1,6 @@
 {application, brotli, [
     {description, "brotli compression library wrapper for Erlang"},
-    {vsn, git},
+    {vsn, "0.3.2"},
     {registered, []},
     {applications, [kernel, stdlib]},
     {env, []},
