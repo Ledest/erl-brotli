@@ -1,17 +1,9 @@
 <a name="unreleased"></a>
 ## [Unreleased]
 
-
-<a name="v0.3.2"></a>
-## [v0.3.2] - 2023-07-25
 ### Bug Fixes
-- build on otp 26 ([`909192f`](https://github.com/yjh0502/erl-brotli/commit/909192fc18c102ff7323b9daa7b73d856c0b8796))
-
-
-<a name="v0.3.1"></a>
-## [v0.3.1] - 2022-01-06
-### Bug Fixes
-- chunk input for brotli:encode/{1,2} ([`eca29c4`](https://github.com/yjh0502/erl-brotli/commit/eca29c44e2d6298c0dc86a0c8e9145fd49fb2449))
+- build on otp 26
+- chunk input for brotli:encode/{1,2}
 
 
 <a name="v0.3.0"></a>
@@ -25,6 +17,4 @@
 - update library to use stream API ([`bc09c59`](https://github.com/yjh0502/erl-brotli/commit/bc09c5969ae4c5b45c07abdd3eb55cc8652fa0ec))
 
 
-[Unreleased]: https://github.com/yjh0502/erl-brotli/compare/v0.3.2...HEAD
-[v0.3.2]: https://github.com/yjh0502/erl-brotli/compare/v0.3.1...v0.3.2
-[v0.3.1]: https://github.com/yjh0502/erl-brotli/compare/v0.3.0...v0.3.1
+[Unreleased]: https://github.com/yjh0502/erl-brotli/compare/v0.3.0...HEAD
