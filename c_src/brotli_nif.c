@@ -431,13 +431,13 @@ static ERL_NIF_TERM brotli_version(ErlNifEnv *env, int argc,
 static ERL_NIF_TERM brotli_max_compressed_size(ErlNifEnv *env, int argc,
                                                const ERL_NIF_TERM argv[]) {
   assert_argc(1);
-  size_t input_size;
+  unsigned long input_size;
 
-  if (!enif_get_uint64(env, argv[0], &input_size)) {
+  if (!enif_get_ulong(env, argv[0], &input_size)) {
     return BADARG;
   }
 
-  return enif_make_uint64(env, BrotliEncoderMaxCompressedSize(input_size));
+  return enif_make_uint64(env, BrotliEncoderMaxCompressedSize((size_t)input_size));
 }
 /* }}} */
 
